@@ -3,6 +3,25 @@ Projet en duo java Q1
 
 
 # Projet java - Gestion de Serveurs et Services
+## Description
+Ce projet a été réalisé dans le cadre du cours de Programmation Orientée Objet (TI215). Il s'agit d'une application en Java permettant la gestion de serveurs et de services d'un parc informatique.
+
+## Fonctionnalités
+    Liste de tous les serveurs
+    Affichage des caractéristiques d'un serveur
+    Ajout d'un nouveau serveur
+    Suppression d'un serveur
+    Allumage/Extinction d'un serveur
+    Liste de tous les services installés sur un serveur
+    Ajout d'un nouveau service sur un serveur
+    Allumage/Extinction d'un service sur un serveur
+    Suppression d'un service sur un serveur
+    Test de disponibilité d'un service sur un serveur
+    Liste de toutes les règles du firewall d'un serveur
+    Ajout d'une règle au firewall d'un serveur
+    Suppression d'une règle du firewall d'un serveur
+    Test de l'ouverture d'un port sur un serveur
+
 ## Architecture
 ### Server
 
@@ -25,11 +44,11 @@ La classe VM est une machine virtuelle qui hérite de Server. Elle peut héberge
 ### Service
 La classe Service représente un service installé sur un serveur. Elle possède un identifiant, un numéro de port et un état (UP ou DOWN). Les méthodes incluent setState(State state) pour modifier l'état du service.
 
-###Firewall
+### Firewall
 La classe Firewall représente le pare-feu du serveur et contient un ensemble de règles (Rule). Chaque règle spécifie un numéro de port et une action (ALLOW ou DENY).
 
-###Rule
+### Rule
 La classe Rule représente une règle du firewall avec un numéro de port et une action.
 
-###Enumeration
+### Enumeration
 L'interface Enumeration contient deux énumérations : State pour représenter l'état (UP ou DOWN) et Action pour représenter l'action du firewall (ALLOW ou DENY).
