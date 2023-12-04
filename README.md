@@ -23,6 +23,8 @@ Ce projet a été réalisé dans le cadre du cours de Programmation Orientée Ob
     Test de l'ouverture d'un port sur un serveur
 
 ## Architecture
+L'application utilise le concept d'héritage pour organiser les différentes classes du projet. Voici une brève explication de la hiérarchie de classes :
+
 ### Server
 
 La classe Server est la classe principale représentant un serveur. Elle possède un identifiant unique, un état (UP ou DOWN), un firewall, et un ensemble de services installés. Les principales méthodes incluent :
