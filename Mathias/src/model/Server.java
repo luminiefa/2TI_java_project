@@ -14,6 +14,7 @@ public class Server implements Enumeration {
 	public Server() {
 		this.id = lastId + 1; //prend l'id du dernier server créé et ajoute 1 pour que l'id soit unique
 		this.state = State.UP;
+		this.installedServices = new HashSet<>();
 	}
 
 	public int getId() {
@@ -46,7 +47,14 @@ public class Server implements Enumeration {
         // Vérifier si le service a un port déjà utilisé ou s'il partage un identifiant avec un autre service
         if (!installedServices.contains(service)) {
             installedServices.add(service);
-            firewall.addRule(new Rule(service.getPort(), Action.ALLOW));
+        }
+    }
+    
+    public void uninstallService(Service service) {
+        // Vérifier si le service est installé sur le serveur
+        if (installedServices.contains(service)) {
+            // Retirer le service de la liste des services installés
+            installedServices.remove(service);
         }
     }
     
