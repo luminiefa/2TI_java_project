@@ -79,6 +79,7 @@ void setup() {
 }
 
 void loop() {
+    // Préparation de millis pour le capteur ultra-son
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= interval) {
         previousMillis = currentMillis;
@@ -104,13 +105,16 @@ void loop() {
             uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
             uint8_t len = sizeof(buf);
             if (rf95.recv(buf, &len)) {
+                // séparation des valeurs reçue par LORA dans VRX et VRY
                 int VRX, VRY;
                 sscanf((char *)buf, "%d#%d", &VRX, &VRY);
+
                 Serial.print("VRx=");
                 Serial.println(VRX);
                 Serial.print("VRy=");
                 Serial.println(VRY);
 
+                // map entre le bouton et la direction. 0 vaudras -127 et 1023 vaudras 127
                 int directionX = map(VRX, 0, 1023, -127, 127);
                 int directionY = map(VRY, 0, 1023, -127, 127);
 
@@ -184,6 +188,7 @@ void loop() {
 }
 
 void setDirection(int direction, int speed) {
+    // Pas de direction
     digitalWrite(pontH1, LOW);
     digitalWrite(pontH2, LOW);
     digitalWrite(pontH3, LOW);
@@ -197,16 +202,16 @@ void setDirection(int direction, int speed) {
             digitalWrite(pontH2, HIGH);
             digitalWrite(pontH3, HIGH);
             digitalWrite(pontH4, LOW);
-            leftSpeed =  speed * TURN_SPEED_FACTOR;
+            leftSpeed =  speed * TURN_SPEED_FACTOR; // TURN_SPEED_FACTOR fait que la roue va à 80% de la vitesse
             analogWrite(PWM1, leftSpeed);  // Contrôle de la vitesse de la roue gauche
-            analogWrite(PWM2, speed);  
+            analogWrite(PWM2, speed);      // Contrôle de la vitesse de la roue droite
             break;
         case 2:  // Avant Droite
             digitalWrite(pontH1, LOW);
             digitalWrite(pontH2, HIGH);
             digitalWrite(pontH3, LOW);
             digitalWrite(pontH4, HIGH);
-            rightSpeed = speed * TURN_SPEED_FACTOR;
+            rightSpeed = speed * TURN_SPEED_FACTOR; // TURN_SPEED_FACTOR fait que la roue va à 80% de la vitesse
             analogWrite(PWM1, speed);       // Contrôle de la vitesse de la roue gauche
             analogWrite(PWM2, rightSpeed);  // Contrôle de la vitesse de la roue droite
             break;
@@ -215,16 +220,16 @@ void setDirection(int direction, int speed) {
             digitalWrite(pontH2, LOW);
             digitalWrite(pontH3, LOW);
             digitalWrite(pontH4, HIGH);
-            leftSpeed = speed * TURN_SPEED_FACTOR;
+            leftSpeed = speed * TURN_SPEED_FACTOR; // TURN_SPEED_FACTOR fait que la roue va à 80% de la vitesse
             analogWrite(PWM1, leftSpeed);  // Contrôle de la vitesse de la roue gauche
-            analogWrite(PWM2, speed); 
+            analogWrite(PWM2, speed);      // Contrôle de la vitesse de la roue droite
             break;
         case 4: // Reculer droite
             digitalWrite(pontH1, LOW);
             digitalWrite(pontH2, HIGH);
             digitalWrite(pontH3, HIGH);
             digitalWrite(pontH4, LOW);
-            rightSpeed = speed * TURN_SPEED_FACTOR;
+            rightSpeed = speed * TURN_SPEED_FACTOR; // TURN_SPEED_FACTOR fait que la roue va à 80% de la vitesse
             analogWrite(PWM1, speed);       // Contrôle de la vitesse de la roue gauche
             analogWrite(PWM2, rightSpeed);  // Contrôle de la vitesse de la roue droite
             break;
@@ -257,9 +262,8 @@ void setDirection(int direction, int speed) {
             digitalWrite(pontH2, LOW);
             digitalWrite(pontH3, LOW);
             digitalWrite(pontH4, LOW);
-            int speed = 0;
-            analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
-            analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
+            analogWrite(PWM1, speed); // Les roues fonctionnent à la même vitesse
+            analogWrite(PWM2, speed); // Les roues fonctionnent à la même vitesse
             break;
     }
 }
@@ -269,6 +273,7 @@ void stopVehicle() {
     digitalWrite(pontH2, LOW);
     digitalWrite(pontH3, LOW);
     digitalWrite(pontH4, LOW);
-    analogWrite(PWM1, 0);
-    analogWrite(PWM2, 0);
+    analogWrite(PWM1, 0); // Les roues ne bougent pas
+    analogWrite(PWM2, 0); // Les roues ne bougent pas
 }
+
