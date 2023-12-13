@@ -26,7 +26,7 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 // Variables pour le ultra-son
 #define TRIGGER 3
 #define ECHO 8
-const MAX_DISTANCE 200
+const int MAX_DISTANCE 200;
 const unsigned long MEASURE_TIMEOUT = 25000UL; // 25ms = 8m à 340m/s
 const float SOUND_SPEED = 340.0 / 1000; // Vitesse du son dans l'air
 
@@ -36,8 +36,8 @@ const long interval = 300; // Intervalle de mesure en millisecondes
 
 // Variables de contrôle du robot
 // define passé en const à la V1
-const DISTANCE_DECLENCHEMENT 10
-const TURN_SPEED_FACTOR 0.8  // Facteur de vitesse pour les virages (80%)
+const int DISTANCE_DECLENCHEMENT 10;
+const float TURN_SPEED_FACTOR 0.8;  // Facteur de vitesse pour les virages (80%)
 
 // Variable pour la gestion de direction 
 int lastDirection = -1; // Dernière direction détectée
@@ -111,6 +111,8 @@ void loop() {
                 Serial.print("VRy=");
                 Serial.println(VRY);
 
+
+
                 int directionX = map(VRX, 0, 1023, -127, 127);
                 int directionY = map(VRY, 0, 1023, -127, 127);
 
@@ -133,8 +135,12 @@ void loop() {
                         digitalWrite(pontH2, HIGH);
                         digitalWrite(pontH3, HIGH);
                         digitalWrite(pontH4, LOW);
-                        int speed = 255; // Vitesse maximale
-                        int leftSpeed = speed * TURN_SPEED_FACTOR;
+                        
+                        
+                        // direction en cas de diagonale
+                        int speed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255);
+                        int leftSpeed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255) * TURN_SPEED_FACTOR;
+
                         analogWrite(PWM1, leftSpeed);  // Contrôle de la vitesse de la roue gauche
                         analogWrite(PWM2, speed);       // Contrôle de la vitesse de la roue droite
                         currentDirection = 1;
@@ -144,8 +150,8 @@ void loop() {
                         digitalWrite(pontH2, LOW);
                         digitalWrite(pontH3, LOW);
                         digitalWrite(pontH4, HIGH);
-                        int speed = 255; // Vitesse maximale
-                        int leftSpeed = speed * TURN_SPEED_FACTOR;
+                        int speed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255);
+                        int leftSpeed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255) * TURN_SPEED_FACTOR;
                         analogWrite(PWM1, leftSpeed);  // Contrôle de la vitesse de la roue gauche
                         analogWrite(PWM2, speed);       // Contrôle de la vitesse de la roue droite
                         currentDirection = 3;
@@ -155,8 +161,8 @@ void loop() {
                         digitalWrite(pontH2, HIGH);
                         digitalWrite(pontH3, LOW);
                         digitalWrite(pontH4, HIGH);
-                        int speed = 255; // Vitesse maximale
-                        int rightSpeed = speed * TURN_SPEED_FACTOR;
+                        int speed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255);
+                        int rightSpeed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255) * TURN_SPEED_FACTOR;
                         analogWrite(PWM1, speed);       // Contrôle de la vitesse de la roue gauche
                         analogWrite(PWM2, rightSpeed);  // Contrôle de la vitesse de la roue droite
                         currentDirection = 2;
@@ -166,8 +172,8 @@ void loop() {
                         digitalWrite(pontH2, HIGH);
                         digitalWrite(pontH3, HIGH);
                         digitalWrite(pontH4, LOW);
-                        int speed = 255; // Vitesse maximale
-                        int rightSpeed = speed * TURN_SPEED_FACTOR;
+                        int speed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255);
+                        int rightSpeed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255) * TURN_SPEED_FACTOR;
                         analogWrite(PWM1, speed);       // Contrôle de la vitesse de la roue gauche
                         analogWrite(PWM2, rightSpeed);  // Contrôle de la vitesse de la roue droite
                         currentDirection = 4;
@@ -177,7 +183,11 @@ void loop() {
                         digitalWrite(pontH2, LOW);
                         digitalWrite(pontH3, LOW);
                         digitalWrite(pontH4, LOW);
-                        int speed = 255; // Vitesse maximale
+                        
+                        // direction normale ENCORE MODIF SELON LAXE
+                        int speed = map(abs(directionY), 0, 127, 0, 255);
+                        
+
                         analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
                         analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
                         currentDirection = 8;
@@ -187,7 +197,7 @@ void loop() {
                         digitalWrite(pontH2, LOW);
                         digitalWrite(pontH3, LOW);
                         digitalWrite(pontH4, HIGH);
-                        int speed = 255; // Vitesse maximale
+                        int speed = map(abs(directionY), 0, 127, 0, 255);
                         analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
                         analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
                         currentDirection = 7;
@@ -197,7 +207,7 @@ void loop() {
                         digitalWrite(pontH2, LOW);
                         digitalWrite(pontH3, HIGH);
                         digitalWrite(pontH4, LOW);
-                        int speed = 255; // Vitesse maximale
+                        int speed = map(abs(directionX), 0, 127, 0, 255);
                         analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
                         analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
                         currentDirection = 6;
@@ -207,7 +217,7 @@ void loop() {
                         digitalWrite(pontH2, HIGH);
                         digitalWrite(pontH3, LOW);
                         digitalWrite(pontH4, HIGH);
-                        int speed = 255; // Vitesse maximale
+                        int speed = map(abs(directionX), 0, 127, 0, 255);
                         analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
                         analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
                         currentDirection = 5;
