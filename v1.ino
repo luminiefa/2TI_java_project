@@ -167,42 +167,42 @@ void loop() {
                         // Avant Gauche
                         speed = map(sqrtXY, 0, 127, 0, 255);
                         currentDirection = 1;
-                        printOnScreenDirection(directionX, directionY);
+                        
                     } else if (directionX > 10 && directionY > 10) {
                         // Reculer gauche
                         speed = map(sqrtXY, 0, 127, 0, 255);
                         currentDirection = 3;
-                        printOnScreenDirection(directionX, directionY);
+                        
                     } else if (directionX < -10 && directionY < -10) {
                         // Avant droite
                         speed = map(sqrtXY, 0, 127, 0, 255);
                         currentDirection = 2;
-                        printOnScreenDirection(directionX, directionY);
+                        
                     } else if (directionX > 10 && directionY < -10) {
                         // Reculer droite
                         speed = map(sqrtXY, 0, 127, 0, 255);
                         currentDirection = 4;
-                        printOnScreenDirection(directionX, directionY);
+                        
                     } else if (directionX < -10 && directionY >= -10 && directionY <= 10) {
                         // Avant
                         speed = map(absDirectionY, 0, 127, 0, 255);
                         currentDirection = 8;
-                        printOnScreenDirection(directionX, directionY);
+                        
                     } else if (directionX > 10 && directionY >= -10 && directionY <= 10) {
                         // Reculer
                         speed = map(absDirectionY, 0, 127, 0, 255);
                         currentDirection = 7;
-                        printOnScreenDirection(directionX, directionY);
+                        
                     } else if (directionY < -10) {
                         // Droite
                         speed = map(absDirectionX, 0, 127, 0, 255);
                         currentDirection = 6;
-                        printOnScreenDirection(directionX, directionY);
+                        
                     } else if (directionY > 6) {
                         // Gauche
                         speed = map(absDirectionX, 0, 127, 0, 255);
                         currentDirection = 5;
-                        printOnScreenDirection(directionX, directionY);
+                        
                     } else {
                         stopVehicle();
                         lastDirection = -1;
@@ -213,11 +213,13 @@ void loop() {
                         // La direction a changé, mettre à jour l'affichage LCD
                         if (currentDirection != -1) {
                             setDirection(currentDirection, speed);
+                            printOnScreenDirection(directionX, directionY);
                         }
                         lastDirection = currentDirection;
                     } else if (currentDirection == -1 && lastDirection != -1) {
                         // Aucun mouvement détecté, effacer l'écran LCD
                         lastDirection = -1;
+                        clearScreen();
                     }
                 }
                 currentDirection = -1; // -1 pour aucune direction
