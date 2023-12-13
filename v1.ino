@@ -111,149 +111,64 @@ void loop() {
                 Serial.print("VRy=");
                 Serial.println(VRY);
 
-
-
                 int directionX = map(VRX, 0, 1023, -127, 127);
                 int directionY = map(VRY, 0, 1023, -127, 127);
 
                 int currentDirection = -1;
                 Serial.println(distance_cm);
 
+                int speed = 0;
+                
+                
+
+
                 if (distance_cm < DISTANCE_DECLENCHEMENT && distance_cm != 0) {
-                    // Arrêter le véhicule s'il y a un obstacle à proximité
-                    digitalWrite(pontH1, LOW);
-                    digitalWrite(pontH2, LOW);
-                    digitalWrite(pontH3, LOW);
-                    digitalWrite(pontH4, LOW);
-                    analogWrite(PWM1, 0); // Roue gauche à l'arrêt
-                    analogWrite(PWM2, 0); // Roue droite à l'arrêt
+                    stopVehicle();
                     lastDirection = -1;
                 } else {
                     if (directionX < -9 && directionY > 9) {
                         // Avant Gauche
-                        digitalWrite(pontH1, LOW);
-                        digitalWrite(pontH2, HIGH);
-                        digitalWrite(pontH3, HIGH);
-                        digitalWrite(pontH4, LOW);
-                        
-                        
-                        // direction en cas de diagonale
-                        int speed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255);
-                        int leftSpeed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255) * TURN_SPEED_FACTOR;
-
-                        analogWrite(PWM1, leftSpeed);  // Contrôle de la vitesse de la roue gauche
-                        analogWrite(PWM2, speed);       // Contrôle de la vitesse de la roue droite
+                        speed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255);
                         currentDirection = 1;
                     } else if (directionX > 10 && directionY > 10) {
                         // Reculer gauche
-                        digitalWrite(pontH1, HIGH);
-                        digitalWrite(pontH2, LOW);
-                        digitalWrite(pontH3, LOW);
-                        digitalWrite(pontH4, HIGH);
-                        int speed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255);
-                        int leftSpeed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255) * TURN_SPEED_FACTOR;
-                        analogWrite(PWM1, leftSpeed);  // Contrôle de la vitesse de la roue gauche
-                        analogWrite(PWM2, speed);       // Contrôle de la vitesse de la roue droite
+                        speed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255);
                         currentDirection = 3;
                     } else if (directionX < -10 && directionY < -10) {
                         // Avant droite
-                        digitalWrite(pontH1, LOW);
-                        digitalWrite(pontH2, HIGH);
-                        digitalWrite(pontH3, LOW);
-                        digitalWrite(pontH4, HIGH);
-                        int speed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255);
-                        int rightSpeed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255) * TURN_SPEED_FACTOR;
-                        analogWrite(PWM1, speed);       // Contrôle de la vitesse de la roue gauche
-                        analogWrite(PWM2, rightSpeed);  // Contrôle de la vitesse de la roue droite
+                        speed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255);
                         currentDirection = 2;
                     } else if (directionX > 10 && directionY < -10) {
                         // Reculer droite
-                        digitalWrite(pontH1, LOW);
-                        digitalWrite(pontH2, HIGH);
-                        digitalWrite(pontH3, HIGH);
-                        digitalWrite(pontH4, LOW);
-                        int speed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255);
-                        int rightSpeed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255) * TURN_SPEED_FACTOR;
-                        analogWrite(PWM1, speed);       // Contrôle de la vitesse de la roue gauche
-                        analogWrite(PWM2, rightSpeed);  // Contrôle de la vitesse de la roue droite
+                        speed = map(sqrt(pow(directionX, 2) + pow(directionY, 2)), 0, 127, 0, 255);
                         currentDirection = 4;
                     } else if (directionX < -10 && directionY >= -10 && directionY <= 10) {
                         // Avant
-                        digitalWrite(pontH1, LOW);
-                        digitalWrite(pontH2, LOW);
-                        digitalWrite(pontH3, LOW);
-                        digitalWrite(pontH4, LOW);
-                        
-                        // direction normale ENCORE MODIF SELON LAXE
                         int speed = map(abs(directionY), 0, 127, 0, 255);
-                        
-
-                        analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
-                        analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
                         currentDirection = 8;
                     } else if (directionX > 10 && directionY >= -10 && directionY <= 10) {
                         // Reculer
-                        digitalWrite(pontH1, HIGH);
-                        digitalWrite(pontH2, LOW);
-                        digitalWrite(pontH3, LOW);
-                        digitalWrite(pontH4, HIGH);
                         int speed = map(abs(directionY), 0, 127, 0, 255);
-                        analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
-                        analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
                         currentDirection = 7;
                     } else if (directionY < -10) {
                         // Droite
-                        digitalWrite(pontH1, HIGH);
-                        digitalWrite(pontH2, LOW);
-                        digitalWrite(pontH3, HIGH);
-                        digitalWrite(pontH4, LOW);
                         int speed = map(abs(directionX), 0, 127, 0, 255);
-                        analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
-                        analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
                         currentDirection = 6;
                     } else if (directionY > 6) {
                         // Gauche
-                        digitalWrite(pontH1, LOW);
-                        digitalWrite(pontH2, HIGH);
-                        digitalWrite(pontH3, LOW);
-                        digitalWrite(pontH4, HIGH);
                         int speed = map(abs(directionX), 0, 127, 0, 255);
-                        analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
-                        analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
                         currentDirection = 5;
                     } else {
-                        digitalWrite(pontH1, LOW);
-                        digitalWrite(pontH2, LOW);
-                        digitalWrite(pontH3, LOW);
-                        digitalWrite(pontH4, LOW);
-                        analogWrite(PWM1, 0); // Roue gauche à l'arrêt
-                        analogWrite(PWM2, 0); // Roue droite à l'arrêt
+                        stopVehicle();
                         lastDirection = -1;
                     }
 
                     if (currentDirection != lastDirection) {
                         // La direction a changé, mettre à jour l'affichage LCD
                         if (currentDirection != -1) {
-                            switch (currentDirection) {
-                                case 1:
-                                    break;
-                                case 2:
-                                    break;
-                                case 3:
-                                    break;
-                                case 4:
-                                    break;
-                                case 5:
-                                    break;
-                                case 6:
-                                    break;
-                                case 7:
-                                    break;
-                                case 8:
-                                    break;
-                            }
-                            lastDirection = currentDirection;
+                            setDirection(currentDirection, speed);
                         }
+                        lastDirection = currentDirection;
                     } else if (currentDirection == -1 && lastDirection != -1) {
                         // Aucun mouvement détecté, effacer l'écran LCD
                         lastDirection = -1;
@@ -265,4 +180,94 @@ void loop() {
             }
         }
     }
+}
+
+void setDirection(int direction, int speed) {
+    digitalWrite(pontH1, LOW);
+    digitalWrite(pontH2, LOW);
+    digitalWrite(pontH3, LOW);
+    digitalWrite(pontH4, LOW);
+
+    int leftSpeed, rightSpeed;
+
+    switch (direction) {
+        case 1:  // Avant Gauche
+            digitalWrite(pontH1, LOW);
+            digitalWrite(pontH2, HIGH);
+            digitalWrite(pontH3, HIGH);
+            digitalWrite(pontH4, LOW);
+            leftSpeed =  speed * TURN_SPEED_FACTOR;
+            analogWrite(PWM1, leftSpeed);  // Contrôle de la vitesse de la roue gauche
+            analogWrite(PWM2, speed);  
+            break;
+        case 2:  // Avant Droite
+            digitalWrite(pontH1, LOW);
+            digitalWrite(pontH2, HIGH);
+            digitalWrite(pontH3, LOW);
+            digitalWrite(pontH4, HIGH);
+            rightSpeed = speed * TURN_SPEED_FACTOR;
+            analogWrite(PWM1, speed);       // Contrôle de la vitesse de la roue gauche
+            analogWrite(PWM2, rightSpeed);  // Contrôle de la vitesse de la roue droite
+            break;
+        case 3:  // Reculer Gauche
+            digitalWrite(pontH1, HIGH);
+            digitalWrite(pontH2, LOW);
+            digitalWrite(pontH3, LOW);
+            digitalWrite(pontH4, HIGH);
+            leftSpeed = speed * TURN_SPEED_FACTOR;
+            analogWrite(PWM1, leftSpeed);  // Contrôle de la vitesse de la roue gauche
+            analogWrite(PWM2, speed); 
+            break;
+        case 4:
+            digitalWrite(pontH1, LOW);
+            digitalWrite(pontH2, HIGH);
+            digitalWrite(pontH3, HIGH);
+            digitalWrite(pontH4, LOW);
+            rightSpeed = speed * TURN_SPEED_FACTOR;
+            analogWrite(PWM1, speed);       // Contrôle de la vitesse de la roue gauche
+            analogWrite(PWM2, rightSpeed);  // Contrôle de la vitesse de la roue droite
+            break;
+        case 5:
+            digitalWrite(pontH1, LOW);
+            digitalWrite(pontH2, HIGH);
+            digitalWrite(pontH3, LOW);
+            digitalWrite(pontH4, HIGH);
+            analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
+            analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
+            break;
+        case 6:
+            digitalWrite(pontH1, HIGH);
+            digitalWrite(pontH2, LOW);
+            digitalWrite(pontH3, HIGH);
+            digitalWrite(pontH4, LOW);
+            analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
+            analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
+            break;
+        case 7:
+            digitalWrite(pontH1, HIGH);
+            digitalWrite(pontH2, LOW);
+            digitalWrite(pontH3, LOW);
+            digitalWrite(pontH4, HIGH);
+            analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
+            analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
+            break;
+        case 8:
+            digitalWrite(pontH1, LOW);
+            digitalWrite(pontH2, LOW);
+            digitalWrite(pontH3, LOW);
+            digitalWrite(pontH4, LOW);
+            int speed = 0;
+            analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
+            analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
+            break;
+    }
+}
+
+void stopVehicle() {
+    digitalWrite(pontH1, LOW);
+    digitalWrite(pontH2, LOW);
+    digitalWrite(pontH3, LOW);
+    digitalWrite(pontH4, LOW);
+    analogWrite(PWM1, 0);
+    analogWrite(PWM2, 0);
 }
