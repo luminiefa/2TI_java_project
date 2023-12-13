@@ -49,12 +49,24 @@ const long interval = 300; // Intervalle de mesure en millisecondes
 // Variables de contrôle du robot
 // define passé en const à la V1
 const int DISTANCE_DECLENCHEMENT 10;
-const float TURN_SPEED_FACTOR 0.8;  // Facteur de vitesse pour les virages (80%)
+const float TURN_SPEED_FACTOR 0.8;  // Facteur de vitesse pour les virages (80%) donc la roue qui devras faire le moin de distance, rouleras moin vite
 
 // Variable pour la gestion de direction 
 int lastDirection = -1; // Dernière direction détectée
 
+// Variables pour la gestion du temps sur la fonction d'incrémentation
+const int boutonPin = 2;  // Broche à laquelle le bouton est connecté
+int compteur = 0;         // Compteur à incrémenter
+unsigned long dernierAppui = 0;  // Temps du dernier appui sur le bouton
+const int delaiAntiRebond = 50;  // Durée anti-rebond du bouton en millisecondes
+const int delaiAffichage = 500;  // Intervalle d'affichage du compteur en millisecondes
+
+
+
 void setup() {
+    // Configure la broche du bouton en entrée avec une résistance de tirage vers le haut
+    pinMode(boutonPin, INPUT_PULLUP);
+
     // Init pontH
     pinMode(pontH1, OUTPUT);
     pinMode(pontH2, OUTPUT);
@@ -81,26 +93,14 @@ void setup() {
     while (!Serial);
     Serial.begin(9600);
     delay(50);
-    Serial.println("Initialisation du LoRa...");
     digitalWrite(RFM95_RST, LOW);
     delay(10);
     digitalWrite(RFM95_RST, HIGH);
     delay(10);
-    while (!rf95.init()) {
-        Serial.println("Échec de l'initialisation du LoRa!");
-        while (1);
-    }
-
-    Serial.println("LoRa OK!");
-    if (!rf95.setFrequency(RF95_FREQ)) {
-        Serial.println("Erreur setFrequency");
-        while (1);
-    }
-    Serial.print("Fréquence établie sur: ");
-    Serial.println(RF95_FREQ);
 }
 
 void loop() {
+    int mode = incrementerCompteur();
     // Préparation de millis pour le capteur ultra-son
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= interval) {
@@ -118,11 +118,6 @@ void loop() {
         float distance_mm = measure / 2.0 * SOUND_SPEED;
         float distance_cm = distance_mm / 10.0;
 
-        // Affichage de la distance
-        Serial.print("Distance : ");
-        Serial.print(distance_cm, 2); // Affiche deux décimales
-        Serial.println(" cm de ");
-
         if (rf95.available()) {
             uint8_t buf[RH_RF95_MAX_MESSAGE_LEN]; //?
             uint8_t len = sizeof(buf);
@@ -131,19 +126,12 @@ void loop() {
                 int VRX, VRY;
                 sscanf((char *)buf, "%d#%d", &VRX, &VRY);
 
-                Serial.print("VRx=");
-                Serial.println(VRX);
-                Serial.print("VRy=");
-                Serial.println(VRY);
-
                 // map entre le bouton et la direction. 0 vaudras -127 et 1023 vaudras 127
                 int directionX = map(VRX, 0, 1023, -127, 127);
                 int directionY = map(VRY, 0, 1023, -127, 127);
 
                 // de base la postion est en neutre donc -1
                 int currentDirection = -1;
-
-                Serial.println(distance_cm);
 
                 // comme de base la voiture est en neutre, la vitesse est de 0
                 int speed = 0;
@@ -213,8 +201,8 @@ void loop() {
                     if (currentDirection != lastDirection) {
                         // La direction a changé, mettre à jour l'affichage LCD
                         if (currentDirection != -1) {
-                            setDirection(currentDirection, speed);
-                            printOnScreenDirection(directionX, directionY);
+                            setDirection(currentDirection, speed, mode);
+                            printOnScreenDirection(directionX, directionY, mode);
                         }
                         lastDirection = currentDirection;
                     } else if (currentDirection == -1 && lastDirection != -1) {
@@ -224,20 +212,19 @@ void loop() {
                     }
                 }
                 currentDirection = -1; // -1 pour aucune direction
-            } else {
-                Serial.println("Échec de la réception");
             }
         }
     }
 }
 
-void setDirection(int direction, int speed) {
+void setDirection(int direction, int speed, int mode) {
     // Pas de direction
     digitalWrite(pontH1, LOW);
     digitalWrite(pontH2, LOW);
     digitalWrite(pontH3, LOW);
     digitalWrite(pontH4, LOW);
 
+    speed = speed * (mode == 1 ? 1.0 : 0.5);
     int leftSpeed, rightSpeed;
 
     switch (direction) {
@@ -247,6 +234,7 @@ void setDirection(int direction, int speed) {
             digitalWrite(pontH3, HIGH);
             digitalWrite(pontH4, LOW);
             leftSpeed =  speed * TURN_SPEED_FACTOR; // TURN_SPEED_FACTOR fait que la roue va à 80% de la vitesse
+            leftSpeed = leftSpeed * (mode == 1 ? 1.0 : 0.5); // Déginit la vitesse aussi selon le mode
             analogWrite(PWM1, leftSpeed);  // Contrôle de la vitesse de la roue gauche
             analogWrite(PWM2, speed);      // Contrôle de la vitesse de la roue droite
             break;
@@ -256,6 +244,7 @@ void setDirection(int direction, int speed) {
             digitalWrite(pontH3, LOW);
             digitalWrite(pontH4, HIGH);
             rightSpeed = speed * TURN_SPEED_FACTOR; // TURN_SPEED_FACTOR fait que la roue va à 80% de la vitesse
+            rightSpeed = rightSpeed * (mode == 1 ? 1.0 : 0.5); // Déginit la vitesse aussi selon le mode
             analogWrite(PWM1, speed);       // Contrôle de la vitesse de la roue gauche
             analogWrite(PWM2, rightSpeed);  // Contrôle de la vitesse de la roue droite
             break;
@@ -265,6 +254,7 @@ void setDirection(int direction, int speed) {
             digitalWrite(pontH3, LOW);
             digitalWrite(pontH4, HIGH);
             leftSpeed = speed * TURN_SPEED_FACTOR; // TURN_SPEED_FACTOR fait que la roue va à 80% de la vitesse
+            leftSpeed = leftSpeed * (mode == 1 ? 1.0 : 0.5); // Déginit la vitesse aussi selon le mode
             analogWrite(PWM1, leftSpeed);  // Contrôle de la vitesse de la roue gauche
             analogWrite(PWM2, speed);      // Contrôle de la vitesse de la roue droite
             break;
@@ -274,6 +264,7 @@ void setDirection(int direction, int speed) {
             digitalWrite(pontH3, HIGH);
             digitalWrite(pontH4, LOW);
             rightSpeed = speed * TURN_SPEED_FACTOR; // TURN_SPEED_FACTOR fait que la roue va à 80% de la vitesse
+            rightSpeed = rightSpeed * (mode == 1 ? 1.0 : 0.5); // Déginit la vitesse aussi selon le mode
             analogWrite(PWM1, speed);       // Contrôle de la vitesse de la roue gauche
             analogWrite(PWM2, rightSpeed);  // Contrôle de la vitesse de la roue droite
             break;
@@ -321,13 +312,39 @@ void stopVehicle() {
     analogWrite(PWM2, 0); // Les roues ne bougent pas
 }
 
-void printOnScreenDirection(int directionX,int  directionY) {
+void printOnScreenDirection(int directionX, int directionY, int mode) {
     lcd.setCursor(0, 1); // Définit le curseur à la première colonne (0) de la deuxième ligne (ligne 1).
+    lcd.print("X: ");
     lcd.print(directionX); // Affiche la valeur de directionX.
     lcd.setCursor(5, 1);
+    lcd.print(" Y: ");
     lcd.print(directionY);
+
+    // Si le mode est à 1, afficher le mode sur l'écran LCD
+    if (mode == 1) {
+        lcd.setCursor(10, 1);
+        lcd.print("Mode: 1");
+    } else {
+        lcd.setCursor(10, 1);
+        lcd.print("Mode: 0");
+    }
 }
 
 void clearScreen() {
     lcd.clear();
 }
+
+
+int incrementerCompteur() {
+  // Vérifie si le bouton est enfoncé et suffisamment de temps s'est écoulé depuis le dernier appui
+  if (digitalRead(boutonPin) == LOW && (millis() - dernierAppui >= delaiAntiRebond)) {
+    dernierAppui = millis();  // Met à jour le temps du dernier appui
+    
+    // Incrémente le compteur
+    compteur = 1 - compteur;  // Passe de 0 à 1 et vice versa
+  }
+  
+  return compteur;
+}
+
+
