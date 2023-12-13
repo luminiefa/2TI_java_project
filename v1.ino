@@ -118,12 +118,18 @@ void loop() {
                 int directionX = map(VRX, 0, 1023, -127, 127);
                 int directionY = map(VRY, 0, 1023, -127, 127);
 
+                // de base la postion est en neutre donc -1
                 int currentDirection = -1;
+
                 Serial.println(distance_cm);
 
+                // comme de base la voiture est en neutre, la vitesse est de 0
                 int speed = 0;
                 
+                // variable qui gère la diagonale X et Y et traduit en nombre pour la vitesse
                 float sqrtXY = sqrt(pow(directionX, 2) + pow(directionY, 2));
+                
+                // comme les direction renvoient de -127 à 127 on garde que de 0 à 127 et on map de 0 à 255 qui est la vitesse max
                 int absDirectionY = abs(directionY);
                 int absDirectionX = abs(directionX);
 
