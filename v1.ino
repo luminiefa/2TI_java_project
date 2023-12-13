@@ -209,6 +209,7 @@ void loop() {
                         clearScreen();
                     }
 
+                    // Vérification de modification de direction
                     if (currentDirection != lastDirection) {
                         // La direction a changé, mettre à jour l'affichage LCD
                         if (currentDirection != -1) {
