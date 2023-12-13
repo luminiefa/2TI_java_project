@@ -1,5 +1,17 @@
 #include <SPI.h>
 #include <RH_RF95.h>
+#include <LiquidCrystal.h>
+
+// Variables pour l'écran LCD
+int rs = 12;
+int en = 11;
+int d4 = 5;
+int d5 = 4;
+int d6 = 3;
+int d7 = 2;
+
+// Création de l'objet lcd
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 // Variables pour LORA
 #define RFM95_CS 10
@@ -43,10 +55,26 @@ const float TURN_SPEED_FACTOR 0.8;  // Facteur de vitesse pour les virages (80%)
 int lastDirection = -1; // Dernière direction détectée
 
 void setup() {
+    // Init pontH
+    pinMode(pontH1, OUTPUT);
+    pinMode(pontH2, OUTPUT);
+    pinMode(pontH3, OUTPUT);
+    pinMode(pontH4, OUTPUT);
+
+    // Init PWM pontH
+    pinMode(PWM1, OUTPUT);
+    pinMode(PWM2, OUTPUT);
+
+    // Init ultra-son
     pinMode(TRIGGER, OUTPUT);
     digitalWrite(TRIGGER, LOW);
     pinMode(ECHO, INPUT);
 
+    // Init LCD
+    lcd.begin(16, 2); // Définition de la taille écran
+    lcd.clear();
+
+    // Init LORA
     pinMode(LED, OUTPUT);
     pinMode(RFM95_RST, OUTPUT);
     digitalWrite(RFM95_RST, HIGH);
@@ -70,12 +98,6 @@ void setup() {
     }
     Serial.print("Fréquence établie sur: ");
     Serial.println(RF95_FREQ);
-
-    // ajouté à la V1
-    pinMode(pontH1, OUTPUT);
-    pinMode(pontH2, OUTPUT);
-    pinMode(pontH3, OUTPUT);
-    pinMode(pontH4, OUTPUT);
 }
 
 void loop() {
@@ -102,7 +124,7 @@ void loop() {
         Serial.println(" cm de ");
 
         if (rf95.available()) {
-            uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+            uint8_t buf[RH_RF95_MAX_MESSAGE_LEN]; //?
             uint8_t len = sizeof(buf);
             if (rf95.recv(buf, &len)) {
                 // séparation des valeurs reçue par LORA dans VRX et VRY
@@ -137,43 +159,54 @@ void loop() {
                 if (distance_cm < DISTANCE_DECLENCHEMENT && distance_cm != 0) {
                     stopVehicle();
                     lastDirection = -1;
+                    // reset de l'écran
+                    clearScreen();
                 } else {
                     // pas d'obstacle le véhicule peut bouger
                     if (directionX < -9 && directionY > 9) {
                         // Avant Gauche
                         speed = map(sqrtXY, 0, 127, 0, 255);
                         currentDirection = 1;
+                        printOnScreenDirection(directionX, directionY);
                     } else if (directionX > 10 && directionY > 10) {
                         // Reculer gauche
                         speed = map(sqrtXY, 0, 127, 0, 255);
                         currentDirection = 3;
+                        printOnScreenDirection(directionX, directionY);
                     } else if (directionX < -10 && directionY < -10) {
                         // Avant droite
                         speed = map(sqrtXY, 0, 127, 0, 255);
                         currentDirection = 2;
+                        printOnScreenDirection(directionX, directionY);
                     } else if (directionX > 10 && directionY < -10) {
                         // Reculer droite
                         speed = map(sqrtXY, 0, 127, 0, 255);
                         currentDirection = 4;
+                        printOnScreenDirection(directionX, directionY);
                     } else if (directionX < -10 && directionY >= -10 && directionY <= 10) {
                         // Avant
                         speed = map(absDirectionY, 0, 127, 0, 255);
                         currentDirection = 8;
+                        printOnScreenDirection(directionX, directionY);
                     } else if (directionX > 10 && directionY >= -10 && directionY <= 10) {
                         // Reculer
                         speed = map(absDirectionY, 0, 127, 0, 255);
                         currentDirection = 7;
+                        printOnScreenDirection(directionX, directionY);
                     } else if (directionY < -10) {
                         // Droite
                         speed = map(absDirectionX, 0, 127, 0, 255);
                         currentDirection = 6;
+                        printOnScreenDirection(directionX, directionY);
                     } else if (directionY > 6) {
                         // Gauche
                         speed = map(absDirectionX, 0, 127, 0, 255);
                         currentDirection = 5;
+                        printOnScreenDirection(directionX, directionY);
                     } else {
                         stopVehicle();
                         lastDirection = -1;
+                        clearScreen();
                     }
 
                     if (currentDirection != lastDirection) {
@@ -285,3 +318,13 @@ void stopVehicle() {
     analogWrite(PWM2, 0); // Les roues ne bougent pas
 }
 
+void printOnScreenDirection(int directionX,int  directionY) {
+    lcd.setCursor(0, 1); // Définit le curseur à la première colonne (0) de la deuxième ligne (ligne 1).
+    lcd.print(directionX); // Affiche la valeur de directionX.
+    lcd.setCursor(5, 1);
+    lcd.print(directionY);
+}
+
+void clearScreen() {
+    lcd.clear();
+}
