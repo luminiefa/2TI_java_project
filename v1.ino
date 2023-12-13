@@ -133,10 +133,12 @@ void loop() {
                 int absDirectionY = abs(directionY);
                 int absDirectionX = abs(directionX);
 
+                // si obstacle détecté stop le vehicule
                 if (distance_cm < DISTANCE_DECLENCHEMENT && distance_cm != 0) {
                     stopVehicle();
                     lastDirection = -1;
                 } else {
+                    // pas d'obstacle le véhicule peut bouger
                     if (directionX < -9 && directionY > 9) {
                         // Avant Gauche
                         speed = map(sqrtXY, 0, 127, 0, 255);
