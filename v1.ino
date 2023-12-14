@@ -38,7 +38,7 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 // Variables pour le ultra-son
 #define TRIGGER 3
 #define ECHO 8
-const int MAX_DISTANCE 200;
+#define MAX_DISTANCE 200
 const unsigned long MEASURE_TIMEOUT = 25000UL; // 25ms = 8m à 340m/s
 const float SOUND_SPEED = 340.0 / 1000; // Vitesse du son dans l'air
 
@@ -48,8 +48,8 @@ const long interval = 300; // Intervalle de mesure en millisecondes
 
 // Variables de contrôle du robot
 // define passé en const à la V1
-const int DISTANCE_DECLENCHEMENT 10;
-const float TURN_SPEED_FACTOR 0.8;  // Facteur de vitesse pour les virages (80%)
+#define DISTANCE_DECLENCHEMENT 10
+#define TURN_SPEED_FACTOR 0.8  // Facteur de vitesse pour les virages (80%)
 
 // Variable pour la gestion de direction 
 int lastDirection = -1; // Dernière direction détectée
@@ -104,130 +104,130 @@ void loop() {
     // Préparation de millis pour le capteur ultra-son
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= interval) {
-        previousMillis = currentMillis;
-        
-        // Envoie d'une impulsion HIGH de 10 us sur broche trigger
-        digitalWrite(TRIGGER, HIGH);
-        delayMicroseconds(10);
-        digitalWrite(TRIGGER, LOW);
+      previousMillis = currentMillis;
+      
+      // Envoie d'une impulsion HIGH de 10 us sur broche trigger
+      digitalWrite(TRIGGER, HIGH);
+      delayMicroseconds(10);
+      digitalWrite(TRIGGER, LOW);
 
-        // Mesure le temps entre l'envoi de l'impulsion et son echo
-        long measure = pulseIn(ECHO, HIGH, MEASURE_TIMEOUT);
+      // Mesure le temps entre l'envoi de l'impulsion et son echo
+      long measure = pulseIn(ECHO, HIGH, MEASURE_TIMEOUT);
 
-        // Calcul de la distance en millimètres et conversion en centimètres
-        float distance_mm = measure / 2.0 * SOUND_SPEED;
-        float distance_cm = distance_mm / 10.0;
+      // Calcul de la distance en millimètres et conversion en centimètres
+      float distance_mm = measure / 2.0 * SOUND_SPEED;
+      float distance_cm = distance_mm / 10.0;
 
-        // Affichage de la distance
-        Serial.print("Distance : ");
-        Serial.print(distance_cm, 2); // Affiche deux décimales
-        Serial.println(" cm de ");
+      // Affichage de la distance
+      Serial.print("Distance : ");
+      Serial.print(distance_cm, 2); // Affiche deux décimales
+      Serial.println(" cm de ");
 
-        if (rf95.available()) {
-            uint8_t buf[RH_RF95_MAX_MESSAGE_LEN]; //?
-            uint8_t len = sizeof(buf);
-            if (rf95.recv(buf, &len)) {
-                // séparation des valeurs reçue par LORA dans VRX et VRY
-                int VRX, VRY;
-                sscanf((char *)buf, "%d#%d", &VRX, &VRY);
+      if (rf95.available()) {
+          uint8_t buf[RH_RF95_MAX_MESSAGE_LEN]; //?
+          uint8_t len = sizeof(buf);
+          if (rf95.recv(buf, &len)) {
+            // séparation des valeurs reçue par LORA dans VRX et VRY
+            int VRX, VRY;
+            sscanf((char *)buf, "%d#%d", &VRX, &VRY);
 
-                Serial.print("VRx=");
-                Serial.println(VRX);
-                Serial.print("VRy=");
-                Serial.println(VRY);
+            Serial.print("VRx=");
+            Serial.println(VRX);
+            Serial.print("VRy=");
+            Serial.println(VRY);
 
-                // map entre le bouton et la direction. 0 vaudras -127 et 1023 vaudras 127
-                int directionX = map(VRX, 0, 1023, -127, 127);
-                int directionY = map(VRY, 0, 1023, -127, 127);
+            // map entre le bouton et la direction. 0 vaudras -127 et 1023 vaudras 127
+            int directionX = map(VRX, 0, 1023, -127, 127);
+            int directionY = map(VRY, 0, 1023, -127, 127);
 
-                // de base la postion est en neutre donc -1
-                int currentDirection = -1;
+            // de base la postion est en neutre donc -1
+            int currentDirection = -1;
 
-                Serial.println(distance_cm);
+            Serial.println(distance_cm);
 
-                // comme de base la voiture est en neutre, la vitesse est de 0
-                int speed = 0;
-                
-                // variable qui gère la diagonale X et Y et traduit en nombre pour la vitesse
-                float sqrtXY = sqrt(pow(directionX, 2) + pow(directionY, 2));
-                
-                // comme les direction renvoient de -127 à 127 on garde que de 0 à 127 et on map de 0 à 255 qui est la vitesse max
-                int absDirectionY = abs(directionY);
-                int absDirectionX = abs(directionX);
+            // comme de base la voiture est en neutre, la vitesse est de 0
+            int speed = 0;
+            
+            // variable qui gère la diagonale X et Y et traduit en nombre pour la vitesse
+            float sqrtXY = sqrt(pow(directionX, 2) + pow(directionY, 2));
+            
+            // comme les direction renvoient de -127 à 127 on garde que de 0 à 127 et on map de 0 à 255 qui est la vitesse max
+            int absDirectionY = abs(directionY);
+            int absDirectionX = abs(directionX);
 
-                // si obstacle détecté stop le vehicule
-                if (distance_cm < DISTANCE_DECLENCHEMENT && distance_cm != 0) {
+              // si obstacle détecté stop le vehicule
+            if (distance_cm < DISTANCE_DECLENCHEMENT && distance_cm != 0) {
+                stopVehicle();
+                lastDirection = -1;
+                // reset de l'écran
+                clearScreen();
+            } else {
+                // pas d'obstacle le véhicule peut bouger
+                if (directionX < -9 && directionY > 9) {
+                    // Avant Gauche
+                    speed = map(sqrtXY, 0, 127, 0, 255);
+                    currentDirection = 1;
+                    
+                } else if (directionX > 10 && directionY > 10) {
+                    // Reculer gauche
+                    speed = map(sqrtXY, 0, 127, 0, 255);
+                    currentDirection = 3;
+                    
+                } else if (directionX < -10 && directionY < -10) {
+                    // Avant droite
+                    speed = map(sqrtXY, 0, 127, 0, 255);
+                    currentDirection = 2;
+                    
+                } else if (directionX > 10 && directionY < -10) {
+                    // Reculer droite
+                    speed = map(sqrtXY, 0, 127, 0, 255);
+                    currentDirection = 4;
+                    
+                } else if (directionX < -10 && directionY >= -10 && directionY <= 10) {
+                    // Avant
+                    speed = map(absDirectionY, 0, 127, 0, 255);
+                    currentDirection = 8;
+                    
+                } else if (directionX > 10 && directionY >= -10 && directionY <= 10) {
+                    // Reculer
+                    speed = map(absDirectionY, 0, 127, 0, 255);
+                    currentDirection = 7;
+                    
+                } else if (directionY < -10) {
+                    // Droite
+                    speed = map(absDirectionX, 0, 127, 0, 255);
+                    currentDirection = 6;
+                    
+                } else if (directionY > 6) {
+                    // Gauche
+                    speed = map(absDirectionX, 0, 127, 0, 255);
+                    currentDirection = 5;
+                    
+                } else {
                     stopVehicle();
                     lastDirection = -1;
-                    // reset de l'écran
                     clearScreen();
-                } else {
-                    // pas d'obstacle le véhicule peut bouger
-                    if (directionX < -9 && directionY > 9) {
-                        // Avant Gauche
-                        speed = map(sqrtXY, 0, 127, 0, 255);
-                        currentDirection = 1;
-                        
-                    } else if (directionX > 10 && directionY > 10) {
-                        // Reculer gauche
-                        speed = map(sqrtXY, 0, 127, 0, 255);
-                        currentDirection = 3;
-                        
-                    } else if (directionX < -10 && directionY < -10) {
-                        // Avant droite
-                        speed = map(sqrtXY, 0, 127, 0, 255);
-                        currentDirection = 2;
-                        
-                    } else if (directionX > 10 && directionY < -10) {
-                        // Reculer droite
-                        speed = map(sqrtXY, 0, 127, 0, 255);
-                        currentDirection = 4;
-                        
-                    } else if (directionX < -10 && directionY >= -10 && directionY <= 10) {
-                        // Avant
-                        speed = map(absDirectionY, 0, 127, 0, 255);
-                        currentDirection = 8;
-                        
-                    } else if (directionX > 10 && directionY >= -10 && directionY <= 10) {
-                        // Reculer
-                        speed = map(absDirectionY, 0, 127, 0, 255);
-                        currentDirection = 7;
-                        
-                    } else if (directionY < -10) {
-                        // Droite
-                        speed = map(absDirectionX, 0, 127, 0, 255);
-                        currentDirection = 6;
-                        
-                    } else if (directionY > 6) {
-                        // Gauche
-                        speed = map(absDirectionX, 0, 127, 0, 255);
-                        currentDirection = 5;
-                        
-                    } else {
-                        stopVehicle();
-                        lastDirection = -1;
-                        clearScreen();
-                    }
-
-                    // Vérification de modification de direction
-                    if (currentDirection != lastDirection) {
-                        // La direction a changé, mettre à jour l'affichage LCD
-                        if (currentDirection != -1) {
-                            setDirection(currentDirection, speed);
-                            printOnScreenDirection(directionX, directionY);
-                        }
-                        lastDirection = currentDirection;
-                    } else if (currentDirection == -1 && lastDirection != -1) {
-                        // Aucun mouvement détecté, effacer l'écran LCD
-                        lastDirection = -1;
-                        clearScreen();
-                    }
                 }
-                currentDirection = -1; // -1 pour aucune direction
-            } else {
-                Serial.println("Échec de la réception");
-            }
-        }
+
+                // Vérification de modification de direction
+                if (currentDirection != lastDirection) {
+                    // La direction a changé, mettre à jour l'affichage LCD
+                    if (currentDirection != -1) {
+                        setDirection(currentDirection, speed);
+                        printOnScreenDirection(directionX, directionY);
+                    }
+                    lastDirection = currentDirection;
+                } else if (currentDirection == -1 && lastDirection != -1) {
+                    // Aucun mouvement détecté, effacer l'écran LCD
+                    lastDirection = -1;
+                    clearScreen();
+                }
+              }
+              currentDirection = -1; // -1 pour aucune direction
+          } else {
+              Serial.println("Échec de la réception");
+          }
+      }
     }
 }
 
