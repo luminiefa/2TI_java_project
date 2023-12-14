@@ -26,7 +26,7 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 // Variables pour le ultra-son
 #define TRIGGER 3
 #define ECHO 8
-const MAX_DISTANCE 200
+#define MAX_DISTANCE 200
 const unsigned long MEASURE_TIMEOUT = 25000UL; // 25ms = 8m à 340m/s
 const float SOUND_SPEED = 340.0 / 1000; // Vitesse du son dans l'air
 
@@ -36,8 +36,8 @@ const long interval = 300; // Intervalle de mesure en millisecondes
 
 // Variables de contrôle du robot
 // define passé en const à la V1
-const DISTANCE_DECLENCHEMENT 10
-const TURN_SPEED_FACTOR 0.8  // Facteur de vitesse pour les virages (80%)
+#define DISTANCE_DECLENCHEMENT 10
+#define TURN_SPEED_FACTOR 0.8  // Facteur de vitesse pour les virages (80%)
 
 // Variable pour la gestion de direction 
 int lastDirection = -1; // Dernière direction détectée
