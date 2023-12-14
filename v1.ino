@@ -47,12 +47,14 @@ void setup() {
     digitalWrite(TRIGGER, LOW);
     pinMode(ECHO, INPUT);
 
+    pinMode(A0, OUTPUT);
+
     pinMode(LED, OUTPUT);
     pinMode(RFM95_RST, OUTPUT);
     digitalWrite(RFM95_RST, HIGH);
     while (!Serial);
     Serial.begin(9600);
-    delay(50);
+    delay(10);
     Serial.println("Initialisation du LoRa...");
     digitalWrite(RFM95_RST, LOW);
     delay(10);
@@ -104,12 +106,15 @@ void loop() {
             uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
             uint8_t len = sizeof(buf);
             if (rf95.recv(buf, &len)) {
-                int VRX, VRY;
-                sscanf((char *)buf, "%d#%d", &VRX, &VRY);
+                int VRX, VRY, push;
+                sscanf((char *)buf, "%d#%d#%d", &VRY, &VRX, &push);
                 Serial.print("VRx=");
                 Serial.println(VRX);
                 Serial.print("VRy=");
                 Serial.println(VRY);
+
+                digitalWrite(A0, push);
+
 
                 int directionX = map(VRX, 0, 1023, -127, 127);
                 int directionY = map(VRY, 0, 1023, -127, 127);
@@ -117,14 +122,20 @@ void loop() {
                 int currentDirection = -1;
                 Serial.println(distance_cm);
 
+                int absDirectionY = abs(directionY);
+                int absDirectionX = abs(directionX);
+
                 if (distance_cm < DISTANCE_DECLENCHEMENT && distance_cm != 0) {
                     // Arrêter le véhicule s'il y a un obstacle à proximité
-                    digitalWrite(pontH1, LOW);
-                    digitalWrite(pontH2, LOW);
-                    digitalWrite(pontH3, LOW);
-                    digitalWrite(pontH4, LOW);
-                    analogWrite(PWM1, 0); // Roue gauche à l'arrêt
-                    analogWrite(PWM2, 0); // Roue droite à l'arrêt
+                    // Reculer
+                        digitalWrite(pontH1, HIGH);
+                        digitalWrite(pontH2, LOW);
+                        digitalWrite(pontH3, LOW);
+                        digitalWrite(pontH4, HIGH);
+                        int speed = 255; // Vitesse maximale
+                        analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
+                        analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
+                        currentDirection = 7;
                     lastDirection = -1;
                 } else {
                     if (directionX < -9 && directionY > 9) {
@@ -174,9 +185,10 @@ void loop() {
                     } else if (directionX < -10 && directionY >= -10 && directionY <= 10) {
                         // Avant
                         digitalWrite(pontH1, LOW);
-                        digitalWrite(pontH2, LOW);
-                        digitalWrite(pontH3, LOW);
+                        digitalWrite(pontH2, HIGH);
+                        digitalWrite(pontH3, HIGH);
                         digitalWrite(pontH4, LOW);
+                        
                         int speed = 255; // Vitesse maximale
                         analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
                         analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
@@ -201,7 +213,7 @@ void loop() {
                         analogWrite(PWM1, speed);  // Les roues fonctionnent à la même vitesse
                         analogWrite(PWM2, speed);  // Les roues fonctionnent à la même vitesse
                         currentDirection = 6;
-                    } else if (directionY > 6) {
+                    } else if (directionY > 7) {
                         // Gauche
                         digitalWrite(pontH1, LOW);
                         digitalWrite(pontH2, HIGH);
