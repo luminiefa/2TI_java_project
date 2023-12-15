@@ -32,8 +32,7 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 
 			break;
 		case EXIT:
-
-			Output.message("Goodbye...");
+			this.exitRequest();
 			break;
 		}
 	}
