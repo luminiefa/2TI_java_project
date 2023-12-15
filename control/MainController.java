@@ -56,28 +56,52 @@ public class MainController extends MenuController<MainMenuAction> {
 	
 	// Action infos sur un serveur
 	private void infoServer() {
-		String idString = Input.readString("Enter the server's ID"); //Lire l'id entré par l'user
-		int id = Integer.parseInt(idString);	//tranforme l'id en integer
-		
-		for (Server server : DataSource.serverList) {
-            if (server.getId() == id) {
-           	selectedServer = server;	//Sélectionne le serveur en fonction de l'id
-            	break;	// arrête la boucle for si serveur trouvé
-            }
-		}
-		Output.message("ID	STATE	Firewall	Services");
-		Output.message(selectedServer.toString());
-		
-		new InfoServerController().start();
-		
+	    String idString = Input.readString("Enter the server's ID"); // Lire l'id entré par l'utilisateur
+
+	    try {
+	        int id = Integer.parseInt(idString); // Transforme l'id en integer
+
+	        boolean serverFound = false;
+	        for (Server server : DataSource.serverList) {
+	            if (server.getId() == id) {
+	            	selectedServer = server; // Sélectionne le serveur en fonction de l'id
+	                serverFound = true;
+	                break; // Arrête la boucle for si le serveur est trouvé
+	            }
+	        }
+
+	        if (serverFound) {
+	            Output.message("ID    STATE    Firewall    Services");
+	            Output.message(selectedServer.toString());
+	            new InfoServerController().start();
+	        } else {
+	            Output.message("Error: Server with this ID does not exist.");
+	        }
+
+	    } catch (NumberFormatException e) {
+	        Output.message("Error: Invalid ID format. Please enter a valid integer.");
+	    }
 	}
 	
 	// Action Ajouter un serveur
 	private void addServer() {
-		String idString = Input.readString("Enter the new server's ID"); //Lire l'id entré par l'user
-		int id = Integer.parseInt(idString);	//tranforme l'id en integer
-		
-		DataSource.serverList.add(new Server(id));	//ajoute le serveur
+	    String idString = Input.readString("Enter the new server's ID"); // Lire l'id entré par l'utilisateur
+
+	    try {
+	        int id = Integer.parseInt(idString); // Transforme l'id en integer
+
+	        for (Server server : DataSource.serverList) {
+	            if (server.getId() == id) {
+	            	Output.message("Error: Server with this ID already exists.");
+	                return; // Sortir de la méthode si l'ID n'est pas unique
+	            }
+	        }
+	        DataSource.serverList.add(new Server(id)); // Ajoute le serveur
+	        Output.message("Server added successfully.");
+	        
+	    } catch (NumberFormatException e) { // Si arrive pas à tranformer l'id en integer renvoie erreur
+	    	Output.message("Error: Invalid ID format. Please enter a valid integer.");
+	    }
 	}
 
 	// Action Supprimer un serveur
