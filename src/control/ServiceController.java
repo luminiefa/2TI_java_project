@@ -29,7 +29,7 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 			this.switchService();
 			break;
 		case DELETE:
-
+			this.deleteService();
 			break;
 		case TEST:
 
@@ -55,14 +55,18 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 		try {
 			int port = Integer.parseInt(portString); // Transforme le port en integer
 			
-			for (Service service : DataSource.selectedServer.getInstalledServices()) {
-	            if (service.getId() == name) {
-	            	Output.message("Error: Service with this name already exists.");
-	                return; // Sortir de la méthode si le nom n'est pas unique
-	            }
-	        }
-			DataSource.selectedServer.installService(new Service(name, port)); //Ajoute le service
-			Output.message("Service " + name + " has been installed on port " + port);
+			if (port >= 0 && port <= 1024) {
+				for (Service service : DataSource.selectedServer.getInstalledServices()) {
+		            if (service.getId() == name) {
+		            	Output.message("Error: Service with this name already exists.");
+		                return; // Sortir de la méthode si le nom n'est pas unique
+		            }
+		        }
+				DataSource.selectedServer.installService(new Service(name, port)); //Ajoute le service
+				Output.message("Service " + name + " has been installed on port " + port);
+				
+			} else {Output.message("Error: Invalid port format. Please enter a number between 0 ans 1024.");}
+				
 			
 		} catch (NumberFormatException e) { // Si arrive pas à tranformer le port en integer renvoie erreur
 	    	Output.message("Error: Invalid port format. Please enter a valid integer.");
@@ -96,6 +100,11 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
         } else {
             Output.message("Error: Service with this name does not exist.");
         }
+		
+	}
+	
+	
+	private void deleteService() {
 		
 	}
 }
