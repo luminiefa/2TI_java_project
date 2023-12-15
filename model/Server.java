@@ -5,16 +5,17 @@ import java.util.HashSet;
 public class Server implements Enumeration {
 	
 	protected int id;
-	
-	protected Firewall firewall;
-	protected HashSet<Service> installedServices;
 	private State state;
+	protected HashSet<Service> installedServices;
+	protected Firewall firewall;
 	
 	public Server(int id) {
-		this.id = id; //prend l'id du dernier serveur créé et ajoute 1 pour que l'id soit unique
+		this.id = id;
 		this.state = State.UP;
 		this.installedServices = new HashSet<>();
+		this.firewall = new Firewall();
 	}
+
 
 	public int getId() {
 		return id;
