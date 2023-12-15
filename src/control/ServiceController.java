@@ -32,7 +32,7 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 			this.deleteService();
 			break;
 		case TEST:
-
+			this.testService();
 			break;
 		case EXIT:
 			this.exitRequest();
@@ -105,6 +105,47 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 	
 	
 	private void deleteService() {
+		String name = Input.readString("Enter the ID of the server to be deleted"); //Lire le nom entré par l'user
 		
+		boolean removed = false;
+        for (Service service : DataSource.selectedServer.getInstalledServices()) {
+            if (service.getId().equals(name)) {
+            	DataSource.selectedServer.uninstallService(service);;
+                Output.message("Service " + name + " removed successfully.");
+                removed = true; //indique qu'il a supprimé quelque chose
+                break; // arrête la boucle for si service trouvé
+            }
+        }
+        if (!removed) { //Si rien de supprimé après la boucle : erreur
+            Output.message("Service " + name + " not found.");
+        }
+    }
+	
+	
+	private void testService() {
+		String name = Input.readString("Enter the service name");
+		
+		Service selectedService = null;
+		boolean serviceFound = false;
+        for (Service service : DataSource.selectedServer.getInstalledServices()) {
+            if (service.getId().equals(name)) { //peut pas utiliser == car compare deux String
+            	selectedService = service; //selectionne le service choisis par l'user
+            	serviceFound = true;
+                break; // Arrête la boucle for si le service est trouvé
+            }
+        }
+        
+        if (serviceFound) {
+        	if (DataSource.selectedServer.isServiceAvailable(selectedService)) {
+        		Output.message("Service " + name + " IS available.");
+        	} else {
+        		Output.message("Service " + name + " IS NOT available.");
+        	}
+           
+            
+        } else {
+            Output.message("Error: Service with this name does not exist.");
+        }
 	}
+	
 }
