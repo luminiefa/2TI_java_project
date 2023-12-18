@@ -32,7 +32,7 @@ public class MainController extends MenuController<MainMenuAction> {
 			this.addServer();
 			break;
 		case DELETE:
-			this.removeServer();
+			this.deleteServer();
 			break;
 		case EXIT_PROGRAM:
 			this.exitRequest();
@@ -106,7 +106,7 @@ public class MainController extends MenuController<MainMenuAction> {
 
 	
 	// Action Supprimer un serveur
-	private void removeServer() {
+	private void deleteServer() {
 		String idString = Input.readString("Enter the ID of the server to be deleted"); //Lire l'id entré par l'user
 		int id = Integer.parseInt(idString);	//tranforme l'id en integer
 		
