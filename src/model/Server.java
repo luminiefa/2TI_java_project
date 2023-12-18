@@ -63,20 +63,29 @@ public class Server implements Enumeration {
     }
     
     public boolean isPortOpen(int port) {
-    	// Si il rentre dans aucun if, il renvera false
-        boolean isPortOpen = false;
-        
-        // Son firewall possède au moins une règle avec l’action ALLOW s’appliquant à ce port
+        // Vérifier si une règle s'applique à tous les ports (port 0)
         for (Rule rule : firewall.getRules()) {
-        	if(rule.getPort()==port && rule.getAction()==Action.ALLOW) {
-        		isPortOpen = true;
-        	}
+            if (rule.getPort() == 0) {
+                if (rule.getAction() == Action.ALLOW) {
+                    return true;
+                } else if (rule.getAction() == Action.DENY) {
+                    return false;
+                }
+            }
         }
-        //Son firewall ne possède aucune règle avec l’action DENY s’appliquant à ce port
+        
+        // Si aucune règle ne s'applique à tous les ports, vérifier les règles spécifiques au port donné
+        boolean isPortOpen = false;
         for (Rule rule : firewall.getRules()) {
-        	if(rule.getPort()==port && rule.getAction()==Action.DENY) {
-        		isPortOpen = false;
-        	}
+            if (rule.getPort() == port) {
+            	// Son firewall possède au moins une règle avec l’action ALLOW s’appliquant à ce port
+                if (rule.getAction() == Action.ALLOW) {
+                    isPortOpen = true;
+                //Son firewall ne possède aucune règle avec l’action DENY s’appliquant à ce port
+                } else if (rule.getAction() == Action.DENY) {
+                    isPortOpen = false;
+                }
+            }
         }
         return isPortOpen;
     }
