@@ -1,5 +1,7 @@
 package control;
 
+import java.util.HashSet;
+
 import control.menu.ServiceMenu;
 import data.DataSource;
 import model.Service;
@@ -9,6 +11,8 @@ import ui.output.Output;
 
 public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAction> {
 
+	private HashSet<Service> services = DataSource.selectedServer.getInstalledServices();
+	
 	// MainController uses a MainMenu
 	public ServiceController() {
 		super(new ServiceMenu());
@@ -43,7 +47,7 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 
 	private void listServices() {
 		Output.message("ID	STATE	PORT");
-		for (Service service : DataSource.selectedServer.getInstalledServices()) {
+		for (Service service : services) {
 			Output.message(service.toString());
 		}
 	}
@@ -55,8 +59,8 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 		try {
 			int port = Integer.parseInt(portString); // Transforme le port en integer
 			
-			if (port >= 0 && port <= 1024) {
-				for (Service service : DataSource.selectedServer.getInstalledServices()) {
+			if (port >= 1 && port <= 1024) {
+				for (Service service : services) {
 		            if (service.getId() == name) {
 		            	Output.message("Error: Service with this name already exists.");
 		                return; // Sortir de la méthode si le nom n'est pas unique
@@ -65,7 +69,7 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 				DataSource.selectedServer.installService(new Service(name, port)); //Ajoute le service
 				Output.message("Service " + name + " has been installed on port " + port);
 				
-			} else {Output.message("Error: Invalid port format. Please enter a number between 0 ans 1024.");}
+			} else {Output.message("Error: Invalid port format. Please enter a number between 1 and 1024.");}
 				
 			
 		} catch (NumberFormatException e) { // Si arrive pas à tranformer le port en integer renvoie erreur
@@ -79,7 +83,7 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 		
 		Service selectedService = null;
 		boolean serviceFound = false;
-        for (Service service : DataSource.selectedServer.getInstalledServices()) {
+        for (Service service : services) {
             if (service.getId().equals(name)) { //peut pas utiliser == car compare deux String
             	selectedService = service; //selectionne le service choisis par l'user
             	serviceFound = true;
@@ -108,7 +112,7 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 		String name = Input.readString("Enter the ID of the server to be deleted"); //Lire le nom entré par l'user
 		
 		boolean removed = false;
-        for (Service service : DataSource.selectedServer.getInstalledServices()) {
+        for (Service service : services) {
             if (service.getId().equals(name)) {
             	DataSource.selectedServer.uninstallService(service);;
                 Output.message("Service " + name + " removed successfully.");
@@ -127,7 +131,7 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 		
 		Service selectedService = null;
 		boolean serviceFound = false;
-        for (Service service : DataSource.selectedServer.getInstalledServices()) {
+        for (Service service : services) {
             if (service.getId().equals(name)) { //peut pas utiliser == car compare deux String
             	selectedService = service; //selectionne le service choisis par l'user
             	serviceFound = true;
