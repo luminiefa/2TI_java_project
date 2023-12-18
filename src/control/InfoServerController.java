@@ -20,15 +20,11 @@ public class InfoServerController extends MenuController<InfoServerMenu.InfoServ
 			new ServiceController().start();
 			break;
 		case FIREWALL:
-
+			new FirewallController().start();
 			break;
 		case EXIT:
 			this.exitRequest();
 			break;
 		}
-
 	}
-
-
-
 }
