@@ -1,7 +1,7 @@
 package model;
 
 public class Rule implements Enumeration {
-	
+
 	private int port;
 	private Action action;
 	
@@ -34,5 +34,10 @@ public class Rule implements Enumeration {
 		this.action = newAction;
 	}
 	
+	@Override
+	public String toString() {
+		return action + "	" + port;
+	}
+
     
 }

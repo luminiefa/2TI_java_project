@@ -6,7 +6,7 @@ public class Service implements Enumeration {
 	private int port;
 	private State state;
 	
-	public Service(String id, int port, State state) {
+	public Service(String id, int port) {
 		this.id = id;
 		setPort(port);
 		this.state = State.DOWN;
@@ -38,5 +38,10 @@ public class Service implements Enumeration {
     public void setState(State newState) {
         this.state = newState;
     }
+
+	@Override
+	public String toString() {
+		return id + "	"  + state + "	" + port;
+	}
 
 }

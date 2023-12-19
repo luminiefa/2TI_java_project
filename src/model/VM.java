@@ -6,7 +6,8 @@ public class VM extends Server {
 	
     private HashSet<Server> hostedServers;
 
-    public VM() {
+    public VM(int id) {
+    	super(id);
         hostedServers = new HashSet<>();
     }
 
