@@ -21,7 +21,7 @@ public class Rule implements Enumeration {
             this.port = newPort;
         } 
         else {
-            throw new IllegalArgumentException("Le numéro de port doit être un entier entre 0 et 1024.");
+            throw new IllegalArgumentException("The port number must be an integer between 0 and 1024.");
         }
     }
 
