@@ -56,10 +56,8 @@ public class FirewallController extends MenuController<FirewallMenu.FirewallMenu
 	
 	
 	private void addRule() {
-		
-		String portString = Input.readString("Enter the rule port");
 		try {
-			int port = Integer.parseInt(portString); // Transforme le port en integer
+			int port = Integer.parseInt(Input.readString("Enter the rule port"));
 			
 			if (port >= 0 && port <= 1024) {
 				for (Rule rule : rules) {
@@ -89,9 +87,8 @@ public class FirewallController extends MenuController<FirewallMenu.FirewallMenu
 	
 	
 	private void deleteRule() {
-		String portString = Input.readString("Enter the rule port");
 		try {
-			int port = Integer.parseInt(portString); // Transforme le port en integer
+			int port = Integer.parseInt(Input.readString("Enter the rule port")); // Transforme le port en integer
 			
 			boolean removed = false;
 	        for (Rule rule : rules) {
@@ -113,9 +110,8 @@ public class FirewallController extends MenuController<FirewallMenu.FirewallMenu
 	}
 	
 	private void testPort() {
-		String portString = Input.readString("Enter the rule port");
 		try {
-			int port = Integer.parseInt(portString); // Transforme le port en integer
+			int port = Integer.parseInt(Input.readString("Enter the rule port")); // Transforme le port en integer
 			if (server.isPortOpen(port)) {
 				Output.message("Port " + port + " is OPEN.");
 			} else {
