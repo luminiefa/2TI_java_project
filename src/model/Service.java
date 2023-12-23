@@ -26,7 +26,7 @@ public class Service implements Enumeration {
             this.port = newPort;
         } 
         else {
-            throw new IllegalArgumentException("Le numéro de port doit être un entier entre 1 et 1024.");
+            throw new IllegalArgumentException("The port number must be an integer between 1 and 1024.");
         }
     }
 

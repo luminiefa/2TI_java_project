@@ -2,21 +2,37 @@ package model;
 
 import java.util.HashSet;
 
+import data.DataSource;
+
 public class Server implements Enumeration {
 	
 	protected int id;
-	private State state;
+	protected State state;
 	protected HashSet<Service> installedServices;
 	protected Firewall firewall;
+	protected HashSet<Server> hostedServers; //liste des serveur qu'il héberge
+	protected Server hostServer; //serveur dans lequel il est héberger
+	protected String type;
 	
 	public Server(int id) {
-		this.id = id;
-		this.state = State.UP;
+		setId(id);
+		setState(State.UP);
 		this.installedServices = new HashSet<>();
 		this.firewall = new Firewall();
+		this.type = "Server";
 	}
 
 
+	public void setId(int id) {
+	    for (Server server : DataSource.serverList) {
+	        if (server.getId() == id) {
+	            throw new IllegalArgumentException("Server with this ID already exists.");
+	        }
+	    }
+	    this.id = id;
+	}
+		
+	
 	public int getId() {
 		return id;
 	}
@@ -48,7 +64,7 @@ public class Server implements Enumeration {
         if (!installedServices.contains(service)) {
             installedServices.add(service);
         } else {
-        	throw new IllegalArgumentException("Un service similaire est déjà installé ici.");
+        	throw new IllegalArgumentException("This service is already installed here.");
         }
     }
     
@@ -58,7 +74,7 @@ public class Server implements Enumeration {
             // Retirer le service de la liste des services installés
             installedServices.remove(service);
         } else {
-        	throw new IllegalArgumentException("Ce service n'est pas installé ici et ne peut donc pas être désinstallé.");
+        	throw new IllegalArgumentException("This service is not installed here and cannot be uninstalled.");
         }
     }
     
@@ -100,9 +116,35 @@ public class Server implements Enumeration {
 		return installedServices;
 	}
 
-	@Override
-	public String toString() {
-		return id + "	" + state + "	" + firewall + "		" + installedServices;
+	
+	// est override dans les classes enfants qui peuvent héberger des serveurs
+	public void deleteHostedServer(Server server) {
+	}
+	
+	// est override dans les classes enfants qui peuvent héberger des serveurs
+	public void addHostedServer(Server server) {
 	}
 
+	public HashSet<Server> getHostedServers() {
+		return hostedServers;
+	}
+	
+	public Server getHost() {
+		return hostServer;
+	}
+	
+	public void setHost(Server server) {
+		this.hostServer = server;
+	}
+
+	
+
+	@Override
+	public String toString() {
+		if (hostServer != null) {
+			return id + "	" + state + "	" + type + "	" + hostServer.getId();
+		} else {
+			return id + "	" + state + "	" + type + "	" + "null";
+		}
+	}
 }

@@ -5,13 +5,16 @@ import java.util.HashSet;
 import control.menu.ServiceMenu;
 import data.DataSource;
 import model.Service;
+import model.Container;
 import model.Enumeration.State;
+import model.Server;
 import ui.input.Input;
 import ui.output.Output;
 
 public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAction> {
 
-	private HashSet<Service> services = DataSource.selectedServer.getInstalledServices();
+	private Server server = DataSource.selectedServer;
+	private HashSet<Service> services = server.getInstalledServices();
 	
 	// MainController uses a MainMenu
 	public ServiceController() {
@@ -66,8 +69,12 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 		                return; // Sortir de la méthode si le nom n'est pas unique
 		            }
 		        }
-				DataSource.selectedServer.installService(new Service(name, port)); //Ajoute le service
-				Output.message("Service " + name + " has been installed on port " + port);
+				if (server instanceof Container && server.getInstalledServices() != null) {
+					Output.message("A Container can only have one maximum service installed.");
+				} else {
+					server.installService(new Service(name, port)); //Ajoute le service
+					Output.message("Service " + name + " has been installed on port " + port);
+				}
 				
 			} else {Output.message("Error: Invalid port format. Please enter a number between 1 and 1024.");}
 				
@@ -114,7 +121,7 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
 		boolean removed = false;
         for (Service service : services) {
             if (service.getId().equals(name)) {
-            	DataSource.selectedServer.uninstallService(service);;
+            	server.uninstallService(service);;
                 Output.message("Service " + name + " removed successfully.");
                 removed = true; //indique qu'il a supprimé quelque chose
                 break; // arrête la boucle for si service trouvé
@@ -140,7 +147,7 @@ public class ServiceController extends MenuController<ServiceMenu.ServiceMenuAct
         }
         
         if (serviceFound) {
-        	if (DataSource.selectedServer.isServiceAvailable(selectedService)) {
+        	if (server.isServiceAvailable(selectedService)) {
         		Output.message("Service " + name + " IS available.");
         	} else {
         		Output.message("Service " + name + " IS NOT available.");

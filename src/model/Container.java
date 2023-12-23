@@ -4,6 +4,7 @@ public class Container extends Server {
 	
     public Container(int id) {
     	super(id);
+    	this.type = "Cont.";
     }
 
     
@@ -15,11 +16,11 @@ public class Container extends Server {
 	        if (!installedServices.contains(service)) {
 	            installedServices.add(service);
 	        } else {
-	        	throw new IllegalArgumentException("Un service similaire est déjà installé ici.");
+	        	throw new IllegalArgumentException("A similar service is already installed here.");
 	        }
         } else {
-        	throw new IllegalArgumentException("Un Container ne peut avoir qu'un service maximum installé.");
+        	throw new IllegalArgumentException("A Container can only have one maximum service installed.");
         }
     }
-    
+  
 }
