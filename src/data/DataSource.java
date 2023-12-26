@@ -10,10 +10,10 @@ import model.Server;
  */
 public class DataSource {
 	
-	// Some data we want to store and access
+	//Liste contenant les serveurs
+	public static final List<Server> serverList = new ArrayList<>();
 	
-	public static List<Server> serverList = new ArrayList<>();
-	
+	//Serveur selectionné depuis le main menu
 	public static Server selectedServer;
 
 }
